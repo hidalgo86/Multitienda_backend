@@ -1,0 +1,757 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type UserType {
+  id: String!
+  username: String!
+  email: String!
+  isEmailVerified: Boolean!
+  status: String!
+  role: String!
+  name: String
+  phone: String
+  address: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type AuthType {
+  user: UserType!
+  access_token: String!
+  refresh_token: String!
+}
+
+type MessageResponseType {
+  message: String!
+}
+
+type TokenResponseType {
+  access_token: String!
+  refresh_token: String!
+}
+
+type PaginatedUserType {
+  items: [UserType!]!
+  total: Int!
+  page: Int!
+  totalPages: Int!
+}
+
+"""Categoría de productos"""
+type CategoryType {
+  """ID de la categoría"""
+  id: ID!
+
+  """Nombre de la categoría"""
+  name: String!
+
+  """Slug amigable para URL"""
+  slug: String!
+
+  """Categoría padre (jerarquía)"""
+  parentId: ID
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+"""Estadísticas de engagement y ventas"""
+type ProductStatsType {
+  """Total de visitas al detalle"""
+  views: Int!
+
+  """Total de veces agregado a favoritos"""
+  favorites: Int!
+
+  """Total de veces agregado al carrito"""
+  cartAdds: Int!
+
+  """Cantidad total vendida"""
+  purchases: Int!
+
+  """Veces que apareció en búsquedas"""
+  searches: Int!
+}
+
+"""Variante de producto (nombre, stock y precio)"""
+type VariantType {
+  """Nombre de la variante (XL, 100ml, rojo, etc.)"""
+  name: String!
+
+  """Stock disponible para esta variante"""
+  stock: Int!
+
+  """Precio de esta variante"""
+  price: Float!
+
+  """Imagen opcional de la variante"""
+  image: String
+}
+
+"""Imagen del producto"""
+type ProductImageType {
+  """URL de la imagen"""
+  url: String!
+
+  """ID publico de la imagen en el proveedor externo"""
+  publicId: String!
+}
+
+"""Entidad del producto para consultas GraphQL"""
+type ProductType {
+  """ID del producto"""
+  id: ID!
+
+  """Código único del producto (ej: ROP-8F3K2A)"""
+  sku: String!
+
+  """Slug amigable para URL (ej: body-algodon-bebe)"""
+  slug: String!
+
+  """ID de la categoría"""
+  categoryId: ID!
+
+  """Nombre del producto"""
+  name: String!
+
+  """Género del producto cuando aplique"""
+  genre: Genre
+
+  """Variantes del producto (talla, color, volumen, etc.)"""
+  variants: [VariantType!]
+
+  """Stock disponible para producto simple sin variantes"""
+  stock: Int
+
+  """Precio para producto simple sin variantes"""
+  price: Float
+
+  """Descripción del producto"""
+  description: String
+
+  """Marca del producto"""
+  brand: String
+
+  """Imagen principal del producto"""
+  thumbnail: String
+
+  """Galería de imágenes del producto"""
+  images: [ProductImageType!]
+
+  """Estado del producto (activo/eliminado)"""
+  state: ProductState!
+
+  """Disponibilidad del producto (disponible/agotado)"""
+  availability: ProductAvailability!
+
+  """Estadísticas de engagement y ventas del producto"""
+  stats: ProductStatsType!
+
+  """Fecha de creación"""
+  createdAt: DateTime
+
+  """Fecha de última actualización"""
+  updatedAt: DateTime
+}
+
+enum Genre {
+  NINA
+  NINO
+  UNISEX
+}
+
+enum ProductState {
+  ACTIVO
+  ELIMINADO
+}
+
+enum ProductAvailability {
+  DISPONIBLE
+  AGOTADO
+}
+
+"""Respuesta paginada de productos"""
+type PaginatedProductType {
+  """Elementos de la página actual"""
+  items: [ProductType!]!
+
+  """Total de elementos"""
+  total: Int!
+
+  """Número de página actual"""
+  page: Int!
+
+  """Total de páginas"""
+  totalPages: Int!
+}
+
+type CartItemSnapshotModel {
+  productName: String!
+  variantName: String
+  thumbnail: String
+  unitPrice: Float!
+}
+
+type CartItemModel {
+  productId: String!
+  variantName: String
+  quantity: Int!
+  snapshot: CartItemSnapshotModel!
+  product: ProductType
+}
+
+type CartModel {
+  id: ID!
+  userId: String!
+  user: UserType
+  items: [CartItemModel!]!
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type FavoriteModel {
+  id: ID!
+  userId: ID!
+  user: UserType
+  productIds: [ID!]!
+  products: [ProductType!]!
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type OrderItemModel {
+  productId: String!
+  variantName: String
+  quantity: Int!
+  productName: String!
+  thumbnail: String
+  unitPrice: Float!
+  lineTotal: Float!
+}
+
+type ShippingAddressModel {
+  address: String!
+  name: String
+  phone: String
+}
+
+type OrderModel {
+  id: ID!
+  orderNumber: String!
+  userId: String!
+  user: UserType
+  items: [OrderItemModel!]!
+  totalAmount: Float!
+  shippingAddress: ShippingAddressModel!
+  deliveryMethod: DeliveryMethod!
+  status: OrderStatus!
+  paymentMethod: PaymentMethod!
+  paymentReference: String
+  paymentReceiptNumber: String
+  paymentProofUrl: String
+  paymentProofPublicId: String
+  paymentProofSubmittedAt: DateTime
+  paidAt: DateTime
+  cancelledAt: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+enum DeliveryMethod {
+  PICKUP
+  DELIVERY
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum PaymentMethod {
+  MANUAL
+}
+
+type PaginatedOrderType {
+  items: [OrderModel!]!
+  total: Int!
+  page: Int!
+  totalPages: Int!
+}
+
+type Banner {
+  id: ID!
+  title: String!
+  imageUrl: String!
+  imagePublicId: String
+  altText: String!
+  subtitle: String!
+  linkUrl: String
+  ctaLabel: String!
+  order: Int!
+  isActive: Boolean!
+  startsAt: DateTime
+  endsAt: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type AuditLogModel {
+  id: String!
+  requestId: String
+  actorUserId: String
+  actorRole: String
+  actorLabel: String
+  action: String!
+  entityType: String!
+  entityId: String
+  entityLabel: String
+  ip: String
+  createdAt: DateTime!
+}
+
+type PaginatedAuditLogType {
+  items: [AuditLogModel!]!
+  total: Int!
+  page: Int!
+  totalPages: Int!
+}
+
+type Query {
+  """Obtener el perfil del usuario autenticado"""
+  me: UserType!
+
+  """Lista usuarios para administracion"""
+  adminUsers(input: UsersQueryInput): PaginatedUserType!
+
+  """Obtiene el carrito del usuario autenticado"""
+  myCart: CartModel!
+  product(id: String!, trackView: Boolean): ProductType!
+  products(input: ProductsQueryInput): PaginatedProductType!
+
+  """Obtener categoria por ID"""
+  category(id: String!): CategoryType
+
+  """Obtener categoria por slug"""
+  categoryBySlug(slug: String!): CategoryType
+
+  """Listar todas las categorias"""
+  categories: [CategoryType!]!
+
+  """Obtiene los favoritos del usuario autenticado"""
+  myFavorites: FavoriteModel!
+
+  """Lista registros de auditoria para administracion"""
+  auditLogs(input: GetAuditLogsInput): PaginatedAuditLogType!
+
+  """Lista las ordenes del usuario autenticado"""
+  myOrders: [OrderModel!]!
+
+  """Lista ordenes para administracion"""
+  adminOrders(input: OrdersQueryInput): PaginatedOrderType!
+
+  """Obtiene una orden puntual del usuario autenticado"""
+  myOrder(orderId: String!): OrderModel!
+
+  """Listar banners activos"""
+  banners: [Banner!]!
+
+  """Listar todos los banners para administracion"""
+  adminBanners: [Banner!]!
+}
+
+input UsersQueryInput {
+  filters: UsersFilterInput
+  pagination: UsersPaginationInput
+}
+
+input UsersFilterInput {
+  username: String
+  email: String
+  role: UserRole
+  isEmailVerified: Boolean
+  status: UserStatus
+}
+
+enum UserRole {
+  CLIENTE
+  ADMINISTRADOR
+}
+
+enum UserStatus {
+  ACTIVO
+  INACTIVO
+  SUSPENDIDO
+  ELIMINADO
+}
+
+input UsersPaginationInput {
+  page: Int! = 1
+  limit: Int! = 20
+}
+
+"""Entrada de consulta para listar productos"""
+input ProductsQueryInput {
+  filters: ProductFilterInput
+  pagination: PaginationInput
+}
+
+"""Filtros de busqueda de productos"""
+input ProductFilterInput {
+  name: String
+  categoryId: String
+  genre: Genre
+  variantNames: [String!]
+  minPrice: Float
+  maxPrice: Float
+  state: ProductState
+  availability: ProductAvailability
+  includeDeleted: Boolean
+}
+
+"""Parametros de paginacion"""
+input PaginationInput {
+  page: Int! = 1
+  limit: Int! = 20
+  sortBy: ProductSortBy = NEWEST
+}
+
+enum ProductSortBy {
+  NEWEST
+  OLDEST
+  PRICE_ASC
+  PRICE_DESC
+  NAME_ASC
+  NAME_DESC
+  MOST_VIEWED
+  MOST_FAVORITED
+  MOST_CART_ADDED
+  MOST_PURCHASED
+  MOST_SEARCHED
+}
+
+input GetAuditLogsInput {
+  actorUserId: String
+  action: String
+  entityType: String
+  entityId: String
+  page: Int = 1
+  limit: Int = 20
+}
+
+input OrdersQueryInput {
+  filters: OrdersFilterInput
+  pagination: OrdersPaginationInput
+}
+
+input OrdersFilterInput {
+  orderId: String
+  status: OrderStatus
+  userId: String
+}
+
+input OrdersPaginationInput {
+  page: Int! = 1
+  limit: Int! = 20
+}
+
+type Mutation {
+  """Registrar un nuevo usuario"""
+  register(input: RegisterUserInput!): MessageResponseType!
+
+  """Verificar el correo del usuario"""
+  verifyEmail(input: VerifyEmailInput!): MessageResponseType!
+
+  """Reenviar código de verificación"""
+  resendVerification(input: ResendVerificationInput!): MessageResponseType!
+
+  """Iniciar sesión y obtener tokens JWT"""
+  login(input: LoginInput!): AuthType!
+
+  """Refrescar access token y refresh token"""
+  refreshToken(input: RefreshTokenInput!): TokenResponseType!
+
+  """Recuperar nombre de usuario por correo"""
+  forgotUsername(input: EmailInput!): MessageResponseType!
+
+  """Solicitar recuperación de contraseña"""
+  forgotPassword(input: EmailInput!): MessageResponseType!
+
+  """Restablecer contraseña con token"""
+  resetPassword(input: ResetPasswordInput!): MessageResponseType!
+
+  """Cambiar la contraseña del usuario autenticado"""
+  changePassword(input: ChangePasswordInput!): MessageResponseType!
+
+  """Cerrar sesion del usuario autenticado"""
+  logout: MessageResponseType!
+
+  """Solicitar codigo para eliminar la cuenta autenticada"""
+  requestAccountDeletion: MessageResponseType!
+
+  """Confirmar eliminacion definitiva de la cuenta autenticada"""
+  confirmAccountDeletion(input: ConfirmAccountDeletionInput!): MessageResponseType!
+
+  """Actualizar el perfil del usuario autenticado"""
+  updateMyProfile(input: UpdateProfileInput!): UserType!
+
+  """Actualiza el estado de un usuario desde administracion"""
+  updateUserStatus(userId: String!, status: UserStatus!): UserType!
+
+  """Actualiza el rol de un usuario desde administracion"""
+  updateUserRole(userId: String!, role: UserRole!): UserType!
+
+  """Crea el carrito del usuario autenticado si todavia no existe"""
+  createMyCart: CartModel!
+
+  """
+  Agrega un producto al carrito autenticado, actualiza su cantidad o lo elimina con quantity 0
+  """
+  addToMyCart(input: AddToCartInput!): CartModel!
+
+  """Elimina todos los productos del carrito del usuario autenticado"""
+  clearMyCart: Boolean!
+  createProduct(input: CreateProductInput!): ProductType!
+  updateProduct(id: String!, input: UpdateProductInput!): ProductType!
+  deleteProduct(id: String!): ProductType!
+  restoreProduct(id: String!): ProductType!
+
+  """Crear una nueva categoria"""
+  createCategory(input: CreateCategoryInput!): CategoryType!
+
+  """Actualizar una categoria"""
+  updateCategory(id: String!, input: UpdateCategoryInput!): CategoryType!
+
+  """Eliminar una categoria"""
+  deleteCategory(id: String!): CategoryType!
+
+  """Agrega un producto a favoritos del usuario autenticado"""
+  addToFavorites(input: AddFavoriteInput!): FavoriteModel!
+
+  """Quita un producto de favoritos del usuario autenticado"""
+  removeFromFavorites(input: RemoveFavoriteInput!): FavoriteModel!
+
+  """Alterna un producto en favoritos del usuario autenticado"""
+  toggleFavorite(input: AddFavoriteInput!): FavoriteModel!
+
+  """Limpia todos los favoritos del usuario autenticado"""
+  clearMyFavorites: Boolean!
+
+  """
+  Completa la compra del carrito autenticado, descuenta stock y genera una orden
+  """
+  checkoutMyCart(input: CheckoutInput): OrderModel!
+
+  """Marca como pagada una orden pendiente del usuario autenticado"""
+  payMyOrder(orderId: String!): OrderModel!
+
+  """
+  Carga el comprobante de pago de una orden pendiente del usuario autenticado
+  """
+  submitPaymentProof(input: SubmitPaymentProofInput!): OrderModel!
+
+  """Marca como pagada una orden desde administracion"""
+  adminPayOrder(orderId: String!): OrderModel!
+
+  """Revierte una orden pagada a pendiente desde administracion"""
+  adminUnpayOrder(orderId: String!): OrderModel!
+
+  """
+  Cancela una orden del usuario autenticado y devuelve el stock reservado
+  """
+  cancelMyOrder(orderId: String!): OrderModel!
+
+  """Cancela una orden desde administracion"""
+  adminCancelOrder(orderId: String!): OrderModel!
+
+  """Crear banner"""
+  createBanner(input: CreateBannerInput!): Banner!
+
+  """Actualizar banner"""
+  updateBanner(id: String!, input: UpdateBannerInput!): Banner!
+
+  """Eliminar banner"""
+  deleteBanner(id: String!): Banner!
+}
+
+input RegisterUserInput {
+  email: String!
+  username: String!
+  password: String!
+}
+
+input VerifyEmailInput {
+  userId: String!
+  code: String!
+}
+
+input ResendVerificationInput {
+  userId: String!
+}
+
+input LoginInput {
+  username: String!
+  password: String!
+}
+
+input RefreshTokenInput {
+  refresh_token: String!
+}
+
+input EmailInput {
+  email: String!
+}
+
+input ResetPasswordInput {
+  username: String!
+  newPassword: String!
+  token: String!
+}
+
+input ChangePasswordInput {
+  oldPassword: String!
+  newPassword: String!
+}
+
+input ConfirmAccountDeletionInput {
+  code: String!
+}
+
+input UpdateProfileInput {
+  name: String
+  address: String
+  phone: String
+}
+
+input AddToCartInput {
+  productId: ID!
+  variantName: String
+  quantity: Int!
+}
+
+input CreateProductInput {
+  categoryId: String!
+  name: String!
+  description: String
+  brand: String
+  thumbnail: String
+  images: [ProductImageInput!]
+  genre: Genre
+  variants: [ProductVariantInput!]
+  stock: Float
+  price: Float
+}
+
+"""Imagen del producto (url + publicId)"""
+input ProductImageInput {
+  url: String!
+  publicId: String!
+}
+
+"""Variante de producto (nombre + stock + price)"""
+input ProductVariantInput {
+  name: String!
+  stock: Float!
+  price: Float!
+  image: String
+}
+
+"""Entrada para actualizar un producto (parcial)"""
+input UpdateProductInput {
+  name: String
+  categoryId: String
+  genre: Genre
+  description: String
+  brand: String
+  thumbnail: String
+  variants: [ProductVariantUpdateInput!]
+  stock: Int
+  price: Float
+  images: [ProductImageUpdateInput!]
+  state: ProductState
+}
+
+"""Variante de producto (nombre + stock + price)"""
+input ProductVariantUpdateInput {
+  name: String!
+  stock: Int!
+  price: Float!
+  image: String
+}
+
+input ProductImageUpdateInput {
+  url: String!
+  publicId: String!
+}
+
+"""Entrada para crear una categoría"""
+input CreateCategoryInput {
+  name: String!
+  slug: String!
+  parentId: String
+}
+
+"""Entrada para actualizar una categoría"""
+input UpdateCategoryInput {
+  name: String
+  slug: String
+  parentId: String
+}
+
+input AddFavoriteInput {
+  productId: ID!
+}
+
+input RemoveFavoriteInput {
+  productId: ID!
+}
+
+input CheckoutInput {
+  deliveryMethod: DeliveryMethod!
+  paymentMethod: CheckoutPaymentMethod
+}
+
+enum CheckoutPaymentMethod {
+  TRANSFER
+  CASH
+}
+
+input SubmitPaymentProofInput {
+  orderId: String!
+  paymentReceiptNumber: String!
+  paymentProofUrl: String!
+  paymentProofPublicId: String!
+}
+
+input CreateBannerInput {
+  title: String!
+  imageUrl: String!
+  imagePublicId: String
+  altText: String
+  subtitle: String
+  linkUrl: String
+  ctaLabel: String
+  order: Int
+  isActive: Boolean
+  startsAt: DateTime
+  endsAt: DateTime
+}
+
+input UpdateBannerInput {
+  title: String
+  imageUrl: String
+  imagePublicId: String
+  altText: String
+  subtitle: String
+  linkUrl: String
+  ctaLabel: String
+  order: Int
+  isActive: Boolean
+  startsAt: DateTime
+  endsAt: DateTime
+}
