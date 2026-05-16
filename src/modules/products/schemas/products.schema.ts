@@ -1,6 +1,7 @@
 // src/modules/products/schemas/products.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
+import { exposeIdAndHideVersion } from '../../../common/mongoose/transforms';
 
 // Estado del producto (activo o eliminado)
 export enum ProductState {
@@ -168,21 +169,19 @@ export const ProductSchema = SchemaFactory.createForClass(Product);
 // - Eliminar variants vacías
 // - Limpiar stock/price si hay variantes
 ProductSchema.pre('validate', function (next) {
-  const doc = this as ProductDocument;
-
   // Si variants es un array vacío, eliminarlo
-  if (doc.variants?.length === 0) {
-    doc.variants = undefined;
+  if (this.variants?.length === 0) {
+    this.variants = undefined;
   }
 
   // Si existe variants, no usar stock ni price globales
-  if (doc.variants?.length) {
-    doc.stock = undefined;
-    doc.price = undefined;
+  if (this.variants?.length) {
+    this.stock = undefined;
+    this.price = undefined;
   }
 
   // Asegura consistencia: debe existir precio global o variantes
-  if (!doc.variants?.length && doc.price === undefined) {
+  if (!this.variants?.length && this.price === undefined) {
     return next(new Error('Product must have price or variants'));
   }
 
@@ -193,22 +192,20 @@ ProductSchema.pre('validate', function (next) {
 // Para variants: si alguna tiene stock > 0, está disponible
 // Para simple: si stock > 0, está disponible
 ProductSchema.pre('save', function (next) {
-  const doc = this as ProductDocument;
-
-  if (doc.variants?.some((v) => v.stock < 0)) {
+  if (this.variants?.some((v) => v.stock < 0)) {
     return next(new Error('Variant stock cannot be negative'));
   }
 
-  if (doc.variants?.length) {
+  if (this.variants?.length) {
     // Producto con variantes: disponible si al menos una variante tiene stock
-    const hasStock = doc.variants.some((v) => v.stock > 0);
-    doc.availability = hasStock
+    const hasStock = this.variants.some((v) => v.stock > 0);
+    this.availability = hasStock
       ? ProductAvailability.DISPONIBLE
       : ProductAvailability.AGOTADO;
-  } else if (doc.stock !== undefined) {
+  } else if (this.stock !== undefined) {
     // Producto simple: disponible si stock > 0
-    doc.availability =
-      doc.stock > 0
+    this.availability =
+      this.stock > 0
         ? ProductAvailability.DISPONIBLE
         : ProductAvailability.AGOTADO;
   }
@@ -219,22 +216,12 @@ ProductSchema.pre('save', function (next) {
 // Transform básico: exponer id y ocultar metadata interna
 ProductSchema.set('toObject', {
   virtuals: false,
-  transform: (_: unknown, ret: Record<string, unknown>) => {
-    (ret as { id?: unknown }).id = ret._id;
-    delete (ret as { _id?: unknown })._id;
-    delete (ret as { __v?: unknown }).__v;
-    return ret;
-  },
+  transform: exposeIdAndHideVersion,
 });
 
 ProductSchema.set('toJSON', {
   virtuals: false,
-  transform: (_: unknown, ret: Record<string, unknown>) => {
-    (ret as { id?: unknown }).id = ret._id;
-    delete (ret as { _id?: unknown })._id;
-    delete (ret as { __v?: unknown }).__v;
-    return ret;
-  },
+  transform: exposeIdAndHideVersion,
 });
 
 // Índice único compuesto para SKU (máxima seguridad multi-servidor)

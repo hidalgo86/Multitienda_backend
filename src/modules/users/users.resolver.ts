@@ -48,7 +48,7 @@ export class UsersResolver {
   ): Promise<PaginatedUserType> {
     const queryModel = new UsersQueryModel({
       filters: input?.filters ?? {},
-      pagination: input?.pagination ?? { page: 1, limit: 20 },
+      pagination: input?.pagination,
     });
 
     return this.usersService.findUsers(queryModel);

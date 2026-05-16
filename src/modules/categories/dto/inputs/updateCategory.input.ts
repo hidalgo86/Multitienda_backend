@@ -1,5 +1,13 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsString, IsOptional, Matches, IsMongoId } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  Matches,
+  IsMongoId,
+  IsBoolean,
+  IsInt,
+  Min,
+} from 'class-validator';
 
 @InputType({ description: 'Entrada para actualizar una categoría' })
 export class UpdateCategoryInput {
@@ -20,4 +28,30 @@ export class UpdateCategoryInput {
   @IsOptional()
   @IsMongoId()
   parentId?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  imagePublicId?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isFeatured?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  displayOrder?: number;
 }

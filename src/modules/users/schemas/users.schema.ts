@@ -1,6 +1,7 @@
 // src/modules/users/schemas/users.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { exposeIdAndOmitFields } from '../../../common/mongoose/transforms';
 
 export enum UserStatus {
   ACTIVO = 'activo',
@@ -91,73 +92,33 @@ export type UserDocument = HydratedDocument<User>;
 export const UserSchema = SchemaFactory.createForClass(User);
 
 UserSchema.pre('validate', function (next) {
-  const doc = this as UserDocument & {
-    username?: string;
-    usernameNormalized?: string;
-  };
-
-  if (typeof doc.username === 'string') {
-    doc.username = doc.username.trim();
-    doc.usernameNormalized = doc.username.toLowerCase();
+  if (typeof this.username === 'string') {
+    this.username = this.username.trim();
+    this.usernameNormalized = this.username.toLowerCase();
   }
 
   next();
 });
 
+const transformUser = exposeIdAndOmitFields([
+  'password',
+  'usernameNormalized',
+  'verificationCodeHash',
+  'verificationCodeExpiresAt',
+  'refreshTokenHash',
+  'passwordResetTokenHash',
+  'passwordResetTokenExpiresAt',
+  'accountDeletionCodeHash',
+  'accountDeletionCodeExpiresAt',
+  'lastAccountDeletionSentAt',
+  'failedLoginAttempts',
+  'lastFailedLoginAt',
+]);
+
 UserSchema.set('toObject', {
-  transform: (_: unknown, ret: Record<string, unknown>) => {
-    if (ret && typeof ret === 'object' && '_id' in ret) {
-      const id = (ret as { _id?: unknown })._id;
-      (ret as { id?: string }).id = typeof id === 'string' ? id : String(id);
-      delete (ret as { _id?: unknown })._id;
-    }
-    delete (ret as { __v?: unknown }).__v;
-    delete (ret as { password?: unknown }).password;
-    delete (ret as { usernameNormalized?: unknown }).usernameNormalized;
-    delete (ret as { verificationCodeHash?: unknown }).verificationCodeHash;
-    delete (ret as { verificationCodeExpiresAt?: unknown })
-      .verificationCodeExpiresAt;
-    delete (ret as { refreshTokenHash?: unknown }).refreshTokenHash;
-    delete (ret as { passwordResetTokenHash?: unknown }).passwordResetTokenHash;
-    delete (ret as { passwordResetTokenExpiresAt?: unknown })
-      .passwordResetTokenExpiresAt;
-    delete (ret as { accountDeletionCodeHash?: unknown })
-      .accountDeletionCodeHash;
-    delete (ret as { accountDeletionCodeExpiresAt?: unknown })
-      .accountDeletionCodeExpiresAt;
-    delete (ret as { lastAccountDeletionSentAt?: unknown })
-      .lastAccountDeletionSentAt;
-    delete (ret as { failedLoginAttempts?: unknown }).failedLoginAttempts;
-    delete (ret as { lastFailedLoginAt?: unknown }).lastFailedLoginAt;
-    return ret;
-  },
+  transform: transformUser,
 });
 
 UserSchema.set('toJSON', {
-  transform: (_: unknown, ret: Record<string, unknown>) => {
-    if (ret && typeof ret === 'object' && '_id' in ret) {
-      const id = (ret as { _id?: unknown })._id;
-      (ret as { id?: string }).id = typeof id === 'string' ? id : String(id);
-      delete (ret as { _id?: unknown })._id;
-    }
-    delete (ret as { __v?: unknown }).__v;
-    delete (ret as { password?: unknown }).password;
-    delete (ret as { usernameNormalized?: unknown }).usernameNormalized;
-    delete (ret as { verificationCodeHash?: unknown }).verificationCodeHash;
-    delete (ret as { verificationCodeExpiresAt?: unknown })
-      .verificationCodeExpiresAt;
-    delete (ret as { refreshTokenHash?: unknown }).refreshTokenHash;
-    delete (ret as { passwordResetTokenHash?: unknown }).passwordResetTokenHash;
-    delete (ret as { passwordResetTokenExpiresAt?: unknown })
-      .passwordResetTokenExpiresAt;
-    delete (ret as { accountDeletionCodeHash?: unknown })
-      .accountDeletionCodeHash;
-    delete (ret as { accountDeletionCodeExpiresAt?: unknown })
-      .accountDeletionCodeExpiresAt;
-    delete (ret as { lastAccountDeletionSentAt?: unknown })
-      .lastAccountDeletionSentAt;
-    delete (ret as { failedLoginAttempts?: unknown }).failedLoginAttempts;
-    delete (ret as { lastFailedLoginAt?: unknown }).lastFailedLoginAt;
-    return ret;
-  },
+  transform: transformUser,
 });

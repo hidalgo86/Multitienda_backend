@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { BusinessSettingsService } from '@/modules/business-settings/business-settings.service';
 import { Resend } from 'resend';
 
 export interface EmailDebugInfo {
@@ -25,10 +26,11 @@ export class EmailService {
   private resend: Resend | null = null;
   private readonly logger = new Logger(EmailService.name);
   private readonly emailFrom: string | undefined;
-  private readonly brandName = 'Chikitoslandia';
-  private readonly brandTeam = 'El equipo de Chikitoslandia';
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly businessSettingsService: BusinessSettingsService,
+  ) {
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
     this.emailFrom = this.configService.get<string>('EMAIL_FROM');
 
@@ -127,22 +129,48 @@ export class EmailService {
     }
   }
 
+  private async getBrandContext(): Promise<{
+    brandName: string;
+    brandTeam: string;
+    logoUrl: string;
+  }> {
+    const settings = await this.businessSettingsService.getSettings();
+    const brandName = settings.businessName.trim() || 'Tu tienda';
+    const rawLogoUrl = settings.logoUrl.trim();
+    const frontendUrl = (
+      this.configService.get<string>('FRONTEND_URL') ?? ''
+    ).replace(/\/+$/, '');
+    const logoUrl =
+      rawLogoUrl && rawLogoUrl.startsWith('/') && frontendUrl
+        ? `${frontendUrl}${rawLogoUrl}`
+        : rawLogoUrl;
+
+    return {
+      brandName,
+      brandTeam: `El equipo de ${brandName}`,
+      logoUrl,
+    };
+  }
+
   async sendVerificationEmailWithDebug(
     to: string,
     name: string,
     code: string,
   ): Promise<EmailSendDebugResult> {
+    const brand = await this.getBrandContext();
+
     return this.sendEmail(
       to,
-      `Verifica tu cuenta en ${this.brandName}`,
+      `Verifica tu cuenta en ${brand.brandName}`,
       `
+        ${brand.logoUrl ? `<p><img src="${brand.logoUrl}" alt="${brand.brandName}" style="max-width: 180px; height: auto;" /></p>` : ''}
         <h1>Hola ${name}!</h1>
-        <p>Gracias por registrarte en ${this.brandName}.</p>
+        <p>Gracias por registrarte en ${brand.brandName}.</p>
         <p>Tu codigo de verificacion es: <strong>${code}</strong></p>
         <p>Ingresa este codigo en la tienda online para activar tu cuenta.</p>
         <br>
         <p>Si tu no creaste esta cuenta, puedes ignorar este mensaje.</p>
-        <p>Saludos,<br>${this.brandTeam}</p>
+        <p>Saludos,<br>${brand.brandTeam}</p>
       `,
     );
   }
@@ -162,15 +190,18 @@ export class EmailService {
     to: string,
     username: string,
   ): Promise<{ message: string }> {
+    const brand = await this.getBrandContext();
+
     const result = await this.sendEmail(
       to,
-      `Recupera tu nombre de usuario en ${this.brandName}`,
+      `Recupera tu nombre de usuario en ${brand.brandName}`,
       `
+        ${brand.logoUrl ? `<p><img src="${brand.logoUrl}" alt="${brand.brandName}" style="max-width: 180px; height: auto;" /></p>` : ''}
         <h1>Hola!</h1>
         <p>Tu nombre de usuario es: <strong>${username}</strong></p>
         <p>Si no solicitaste este correo, ignoralo.</p>
         <br>
-        <p>Saludos,<br>${this.brandTeam}</p>
+        <p>Saludos,<br>${brand.brandTeam}</p>
       `,
     );
 
@@ -186,6 +217,7 @@ export class EmailService {
     username: string,
     token: string,
   ): Promise<void> {
+    const brand = await this.getBrandContext();
     const frontendUrl = (
       this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3000'
     ).replace(/\/+$/, '');
@@ -194,8 +226,9 @@ export class EmailService {
     )}&token=${encodeURIComponent(token)}`;
     const result = await this.sendEmail(
       to,
-      `Recupera tu contrasena en ${this.brandName}`,
+      `Recupera tu contrasena en ${brand.brandName}`,
       `
+        ${brand.logoUrl ? `<p><img src="${brand.logoUrl}" alt="${brand.brandName}" style="max-width: 180px; height: auto;" /></p>` : ''}
         <h1>Hola ${username}!</h1>
         <p>Si has olvidado tu contrasena</p>
         <br>
@@ -206,7 +239,7 @@ export class EmailService {
         <br>
         <p>Si no solicitaste este correo, ignoralo.</p>
         <br>
-        <p>Saludos,<br>${this.brandTeam}</p>
+        <p>Saludos,<br>${brand.brandTeam}</p>
       `,
     );
 
@@ -220,10 +253,13 @@ export class EmailService {
     username: string,
     code: string,
   ): Promise<void> {
+    const brand = await this.getBrandContext();
+
     const result = await this.sendEmail(
       to,
-      `Confirma la eliminacion de tu cuenta en ${this.brandName}`,
+      `Confirma la eliminacion de tu cuenta en ${brand.brandName}`,
       `
+        ${brand.logoUrl ? `<p><img src="${brand.logoUrl}" alt="${brand.brandName}" style="max-width: 180px; height: auto;" /></p>` : ''}
         <h1>Hola ${username}!</h1>
         <p>Recibimos una solicitud para eliminar definitivamente tu cuenta.</p>
         <p>Tu codigo de confirmacion es: <strong>${code}</strong></p>
@@ -231,7 +267,7 @@ export class EmailService {
         <p>Si confirmas la eliminacion, perderas acceso a tu cuenta, perfil, carrito y favoritos.</p>
         <p>Si no solicitaste esta accion, ignora este mensaje y cambia tu contrasena.</p>
         <br>
-        <p>Saludos,<br>${this.brandTeam}</p>
+        <p>Saludos,<br>${brand.brandTeam}</p>
       `,
     );
 

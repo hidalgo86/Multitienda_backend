@@ -48,8 +48,8 @@ async function bootstrap() {
         filename: 'logs/application-%DATE%.log',
         datePattern: 'YYYY-MM-DD',
         zippedArchive: true,
-        maxSize: '10m',
-        maxFiles: '7d',
+        maxSize: process.env.LOG_MAX_SIZE || '10m',
+        maxFiles: process.env.LOG_MAX_FILES || '7d',
         format: winston.format.combine(
           winston.format.timestamp({
             format: 'YYYY-MM-DD HH:mm:ss',
@@ -117,6 +117,12 @@ async function bootstrap() {
   logger.log(`Servidor escuchando en el puerto ${String(port)}`, 'Bootstrap');
 }
 
-bootstrap().catch((err) => {
-  new Logger('Bootstrap').error('Fatal error during bootstrap', err);
+bootstrap().catch((err: unknown) => {
+  const logger = new Logger('Bootstrap');
+  if (err instanceof Error) {
+    logger.error(`Fatal error during bootstrap: ${err.message}`, err.stack);
+    return;
+  }
+
+  logger.error(`Fatal error during bootstrap: ${String(err)}`);
 });

@@ -43,15 +43,19 @@ export class RolesGuard implements CanActivate {
       gqlCtxRaw && typeof gqlCtxRaw === 'object' && 'req' in gqlCtxRaw
         ? (gqlCtxRaw as { req?: Request }).req
         : undefined;
-    const httpUser = httpReq?.user as { role?: string } | undefined;
-    const gqlUser = gqlReq?.user as { role?: string } | undefined;
+    const httpUser = httpReq?.user;
+    const gqlUser = gqlReq?.user;
     const user = httpUser ?? gqlUser;
 
     // Verifica si el rol del usuario está incluido en los roles permitidos
     // Si el usuario tiene el rol requerido, retorna true y permite el acceso
     // Si no, retorna false y bloquea el acceso
-    if (!user?.role) return false;
-    return requiredRoles.includes(user.role);
+    if (!user || typeof user !== 'object' || !('role' in user)) {
+      return false;
+    }
+
+    const role = (user as { role?: unknown }).role;
+    return typeof role === 'string' && requiredRoles.includes(role);
   }
 }
 

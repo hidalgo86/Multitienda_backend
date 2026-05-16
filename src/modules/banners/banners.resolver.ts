@@ -15,7 +15,7 @@ export class BannersResolver {
 
   @Query(() => [BannerType], { description: 'Listar banners activos' })
   async banners(): Promise<BannerType[]> {
-    return (await this.bannersService.findActive()) as BannerType[];
+    return await this.bannersService.findActive();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -24,7 +24,7 @@ export class BannersResolver {
     description: 'Listar todos los banners para administracion',
   })
   async adminBanners(): Promise<BannerType[]> {
-    return (await this.bannersService.findAll()) as BannerType[];
+    return await this.bannersService.findAll();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -33,7 +33,7 @@ export class BannersResolver {
   async createBanner(
     @Args('input') input: CreateBannerInput,
   ): Promise<BannerType> {
-    return (await this.bannersService.create(input)) as BannerType;
+    return await this.bannersService.create(input);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -43,13 +43,13 @@ export class BannersResolver {
     @Args('id') id: string,
     @Args('input') input: UpdateBannerInput,
   ): Promise<BannerType> {
-    return (await this.bannersService.update(id, input)) as BannerType;
+    return await this.bannersService.update(id, input);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMINISTRADOR)
   @Mutation(() => BannerType, { description: 'Eliminar banner' })
   async deleteBanner(@Args('id') id: string): Promise<BannerType> {
-    return (await this.bannersService.delete(id)) as BannerType;
+    return await this.bannersService.delete(id);
   }
 }

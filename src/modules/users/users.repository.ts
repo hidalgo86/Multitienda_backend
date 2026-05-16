@@ -148,9 +148,7 @@ export class UsersRepository implements OnModuleInit {
       .exec();
   }
 
-  async resetFailedLoginAttempts(
-    userId: string,
-  ): Promise<UserDocument | null> {
+  async resetFailedLoginAttempts(userId: string): Promise<UserDocument | null> {
     return this.userModel
       .findByIdAndUpdate(
         userId,

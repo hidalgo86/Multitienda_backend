@@ -19,6 +19,11 @@ export class CategoriesService {
     name: string;
     slug: string;
     parentId?: string;
+    description?: string;
+    imageUrl?: string;
+    imagePublicId?: string | null;
+    isFeatured?: boolean;
+    displayOrder?: number;
   }): Promise<CategoryModel> {
     try {
       // Validar slug único
@@ -69,7 +74,16 @@ export class CategoriesService {
 
   async update(
     id: string,
-    input: { name?: string; slug?: string; parentId?: string },
+    input: {
+      name?: string;
+      slug?: string;
+      parentId?: string;
+      description?: string;
+      imageUrl?: string;
+      imagePublicId?: string | null;
+      isFeatured?: boolean;
+      displayOrder?: number;
+    },
   ): Promise<CategoryModel> {
     try {
       const category = await this.findById(id);

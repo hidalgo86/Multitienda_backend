@@ -23,9 +23,7 @@ import {
 import { Transform, Type } from 'class-transformer';
 
 @ValidatorConstraint({ name: 'noStockPriceWithVariants', async: false })
-class NoStockPriceWithVariantsConstraint
-  implements ValidatorConstraintInterface
-{
+class NoStockPriceWithVariantsConstraint implements ValidatorConstraintInterface {
   validate(_: unknown, args: ValidationArguments): boolean {
     const obj = args.object as UpdateProductInput;
     if (!Array.isArray(obj.variants) || obj.variants.length === 0) {

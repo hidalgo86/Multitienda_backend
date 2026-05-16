@@ -3,6 +3,11 @@ export class CategoryModel {
   name!: string;
   slug!: string;
   parentId?: string;
+  description?: string;
+  imageUrl?: string;
+  imagePublicId?: string | null;
+  isFeatured?: boolean;
+  displayOrder?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }

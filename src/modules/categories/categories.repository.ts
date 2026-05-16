@@ -37,6 +37,16 @@ export class CategoriesRepository {
       name: this.stringValue(raw.name),
       slug: this.stringValue(raw.slug),
       parentId: raw.parent ? this.idValue(raw.parent) : undefined,
+      description: this.stringValue(raw.description),
+      imageUrl: this.stringValue(raw.imageUrl),
+      imagePublicId:
+        typeof raw.imagePublicId === 'string' ? raw.imagePublicId : null,
+      isFeatured: raw.isFeatured === true,
+      displayOrder:
+        typeof raw.displayOrder === 'number' &&
+        Number.isFinite(raw.displayOrder)
+          ? raw.displayOrder
+          : 0,
       createdAt: this.dateValue(raw.createdAt),
       updatedAt: this.dateValue(raw.updatedAt),
     };
@@ -69,7 +79,10 @@ export class CategoriesRepository {
   }
 
   async findAll(): Promise<CategoryModel[]> {
-    const categories = await this.categoryModel.find().exec();
+    const categories = await this.categoryModel
+      .find()
+      .sort({ displayOrder: 1, name: 1 })
+      .exec();
     return categories.map((c) =>
       this.normalizeCategory(
         c.toObject() as unknown as Record<string, unknown>,

@@ -17,6 +17,24 @@ export class CategoryType {
   })
   parentId?: string;
 
+  @Field({ nullable: true, description: 'Descripcion publica' })
+  description?: string;
+
+  @Field({ nullable: true, description: 'Imagen publica de la categoria' })
+  imageUrl?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Public ID de Cloudinary',
+  })
+  imagePublicId?: string | null;
+
+  @Field({ description: 'Indica si aparece destacada en la tienda' })
+  isFeatured!: boolean;
+
+  @Field({ description: 'Orden visual en listados destacados' })
+  displayOrder!: number;
+
   @Field(() => GraphQLISODateTime, { nullable: true })
   createdAt?: Date;
 

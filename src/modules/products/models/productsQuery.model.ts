@@ -43,6 +43,9 @@ export class ProductsQueryModel {
 
   constructor(input?: Partial<ProductsQueryModel>) {
     this.filters = input?.filters ?? {};
-    this.pagination = input?.pagination ?? { page: 1, limit: 20 };
+    this.pagination = input?.pagination ?? {
+      page: 1,
+      limit: Number(process.env.DEFAULT_PAGE_LIMIT) || 20,
+    };
   }
 }

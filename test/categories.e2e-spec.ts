@@ -26,9 +26,7 @@ describe('CategoriesResolver (e2e)', () => {
 
   beforeAll(async () => {
     currentRole = UserRole.ADMINISTRADOR;
-    jest
-      .spyOn(JwtAuthGuard.prototype, 'canActivate')
-      .mockReturnValue(true as never);
+    jest.spyOn(JwtAuthGuard.prototype, 'canActivate').mockReturnValue(true);
     jest
       .spyOn(RolesGuard.prototype, 'canActivate')
       .mockImplementation((context: ExecutionContext) => {

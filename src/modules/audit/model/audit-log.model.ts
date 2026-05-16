@@ -14,7 +14,7 @@ const GraphQLJSONObject = new GraphQLScalarType({
         case Kind.STRING:
         case Kind.BOOLEAN:
           acc[field.name.value] = field.value.value;
-          break; 
+          break;
         case Kind.INT:
         case Kind.FLOAT:
           acc[field.name.value] = Number(field.value.value);

@@ -29,9 +29,7 @@ export class ProductsResolver {
     @Args('input') input: CreateProductInput,
   ): Promise<ProductType> {
     const model = new CreateProductModel(input);
-    const product = (await this.productsFacade.createProduct(
-      model,
-    )) as ProductType;
+    const product = await this.productsFacade.createProduct(model);
     return product;
   }
 
@@ -62,7 +60,7 @@ export class ProductsResolver {
   ): Promise<PaginatedProductType> {
     const queryModel = new ProductsQueryModel({
       filters: input?.filters ?? {},
-      pagination: input?.pagination ?? { page: 1, limit: 20 },
+      pagination: input?.pagination,
     });
     return this.productsFacade.findProducts(queryModel, {
       role: context?.req?.user?.role,

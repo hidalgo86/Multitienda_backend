@@ -656,9 +656,9 @@ describe('OrdersService', () => {
 
     const result = await service.cancelExpiredPendingOrders(now);
 
-    expect(ordersRepository.findExpiredPendingWithoutProof).toHaveBeenCalledWith(
-      new Date('2026-04-21T12:00:00.000Z'),
-    );
+    expect(
+      ordersRepository.findExpiredPendingWithoutProof,
+    ).toHaveBeenCalledWith(new Date('2026-04-21T12:00:00.000Z'));
     expect(ordersRepository.cancelPendingById).toHaveBeenCalledWith(
       '507f191e810c19729de860ec',
       now,

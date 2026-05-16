@@ -3,6 +3,28 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { Order, OrderDocument, OrderStatus } from './schemas/orders.schema';
 
+export type OrderLean = {
+  id?: string;
+  _id?: { toString(): string };
+  orderNumber?: string;
+  userId: string;
+  items: Order['items'];
+  totalAmount: number;
+  shippingAddress: Order['shippingAddress'];
+  deliveryMethod?: Order['deliveryMethod'];
+  status: Order['status'];
+  paymentMethod: Order['paymentMethod'];
+  paymentReference?: string;
+  paymentReceiptNumber?: string;
+  paymentProofUrl?: string;
+  paymentProofPublicId?: string;
+  paymentProofSubmittedAt?: Date | null;
+  paidAt?: Date | null;
+  cancelledAt?: Date | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
 @Injectable()
 export class OrdersRepository {
   constructor(
@@ -33,14 +55,14 @@ export class OrdersRepository {
     query: FilterQuery<Order>,
     skip: number,
     limit: number,
-  ): Promise<{ items: OrderDocument[]; total: number }> {
+  ): Promise<{ items: OrderLean[]; total: number }> {
     const [items, total] = await Promise.all([
       this.orderModel
         .find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .lean()
+        .lean<OrderLean[]>()
         .exec(),
       this.orderModel.countDocuments(query).exec(),
     ]);

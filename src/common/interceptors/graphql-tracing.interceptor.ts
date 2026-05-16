@@ -210,10 +210,7 @@ function summarizeAuditValue(value: unknown): unknown {
   return value;
 }
 
-function getRecordValue(
-  value: unknown,
-  field: string,
-): unknown {
+function getRecordValue(value: unknown, field: string): unknown {
   return value && typeof value === 'object'
     ? (value as Record<string, unknown>)[field]
     : undefined;
@@ -320,14 +317,14 @@ export class GraphqlTracingInterceptor implements NestInterceptor {
             void previousProductPromise
               .then((previousProduct) =>
                 this.auditService.record({
-                requestId,
-                actorUserId: resolveActorUserId(user, result),
-                actorRole: user?.role,
-                action: auditEvent.action,
-                entityType: auditEvent.entityType,
-                entityId: getEntityId(args, result),
-                entityLabel: getEntityLabel(result),
-                ip,
+                  requestId,
+                  actorUserId: resolveActorUserId(user, result),
+                  actorRole: user?.role,
+                  action: auditEvent.action,
+                  entityType: auditEvent.entityType,
+                  entityId: getEntityId(args, result),
+                  entityLabel: getEntityLabel(result),
+                  ip,
                   metadata: getAuditMetadata(
                     fieldName,
                     args,

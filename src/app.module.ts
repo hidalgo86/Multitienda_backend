@@ -20,6 +20,7 @@ import { graphQLSecurityRule } from '@/common/graphql/security-rules';
 import { RequestContextMiddleware } from '@/common/middleware/request-context.middleware';
 import { GraphqlTracingInterceptor } from '@/common/interceptors/graphql-tracing.interceptor';
 import { AuditModule } from '@/modules/audit/audit.module';
+import { BusinessSettingsModule } from '@/modules/business-settings/business-settings.module';
 
 @Module({
   imports: [
@@ -132,8 +133,8 @@ query MeExample {
     ThrottlerModule.forRoot({
       throttlers: [
         {
-          ttl: 60, // Tiempo en segundos
-          limit: 10, // Número máximo de solicitudes permitidas
+          ttl: Number(process.env.THROTTLE_TTL_SECONDS) || 60,
+          limit: Number(process.env.THROTTLE_LIMIT) || 10,
         },
       ],
     }),
@@ -146,6 +147,7 @@ query MeExample {
     OrdersModule,
     FavoritesModule,
     BannersModule,
+    BusinessSettingsModule,
   ],
   controllers: [],
   providers: [

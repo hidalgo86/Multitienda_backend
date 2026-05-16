@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { exposeIdAndHideVersion } from '../../../common/mongoose/transforms';
 import { DeliveryMethod } from '../dto/inputs/checkout.input';
 
 export enum OrderStatus {
@@ -114,25 +115,9 @@ export type OrderDocument = HydratedDocument<Order>;
 export const OrderSchema = SchemaFactory.createForClass(Order);
 
 OrderSchema.set('toObject', {
-  transform: (_: unknown, ret: Record<string, unknown>) => {
-    if (ret && typeof ret === 'object' && '_id' in ret) {
-      const id = (ret as { _id?: unknown })._id;
-      (ret as { id?: string }).id = typeof id === 'string' ? id : String(id);
-      delete (ret as { _id?: unknown })._id;
-    }
-    delete (ret as { __v?: unknown }).__v;
-    return ret;
-  },
+  transform: exposeIdAndHideVersion,
 });
 
 OrderSchema.set('toJSON', {
-  transform: (_: unknown, ret: Record<string, unknown>) => {
-    if (ret && typeof ret === 'object' && '_id' in ret) {
-      const id = (ret as { _id?: unknown })._id;
-      (ret as { id?: string }).id = typeof id === 'string' ? id : String(id);
-      delete (ret as { _id?: unknown })._id;
-    }
-    delete (ret as { __v?: unknown }).__v;
-    return ret;
-  },
+  transform: exposeIdAndHideVersion,
 });

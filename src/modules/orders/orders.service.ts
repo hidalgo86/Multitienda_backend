@@ -24,6 +24,7 @@ import {
 } from './dto/inputs/checkout.input';
 import { OrdersQueryInput } from './dto/inputs/getOrders.input';
 import { SubmitPaymentProofInput } from './dto/inputs/submitPaymentProof.input';
+import { getAllowedImageHosts } from '@/common/config/image-hosts';
 
 type ReservedItem = {
   productId: string;
@@ -97,11 +98,11 @@ export class OrdersService {
 
     if (
       url.protocol !== 'https:' ||
-      url.hostname !== 'res.cloudinary.com' ||
+      !getAllowedImageHosts().has(url.hostname.toLowerCase()) ||
       !url.pathname.includes('/image/upload/')
     ) {
       throw new BadRequestException(
-        'El comprobante debe ser una imagen valida de Cloudinary',
+        'El comprobante debe ser una imagen valida de un proveedor permitido',
       );
     }
 
@@ -667,7 +668,15 @@ export class OrdersService {
       let cancelledCount = 0;
 
       for (const order of expiredOrders) {
-        const orderId = order.id ?? order._id?.toString();
+        const orderIdentity = order as { id?: unknown; _id?: unknown };
+        const rawOrderId = orderIdentity.id ?? orderIdentity._id;
+        const objectId = rawOrderId as { toHexString?: () => string };
+        const orderId =
+          typeof rawOrderId === 'string'
+            ? rawOrderId
+            : typeof objectId.toHexString === 'function'
+              ? objectId.toHexString()
+              : '';
 
         if (!orderId) {
           continue;

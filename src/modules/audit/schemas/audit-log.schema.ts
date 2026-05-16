@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { exposeIdAndHideVersion } from '../../../common/mongoose/transforms';
 
 const DEFAULT_AUDIT_LOG_RETENTION_DAYS = 180;
 
@@ -54,15 +55,7 @@ export type AuditLogDocument = HydratedDocument<AuditLog>;
 export const AuditLogSchema = SchemaFactory.createForClass(AuditLog);
 
 AuditLogSchema.set('toObject', {
-  transform: (_: unknown, ret: Record<string, unknown>) => {
-    if (ret && typeof ret === 'object' && '_id' in ret) {
-      const id = (ret as { _id?: unknown })._id;
-      (ret as { id?: string }).id = typeof id === 'string' ? id : String(id);
-      delete (ret as { _id?: unknown })._id;
-    }
-    delete (ret as { __v?: unknown }).__v;
-    return ret;
-  },
+  transform: exposeIdAndHideVersion,
 });
 
 AuditLogSchema.index(

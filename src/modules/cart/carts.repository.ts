@@ -37,7 +37,7 @@ export class CartsRepository {
   }
 
   // Update a cart
-  async update(id: string, data: Partial<Cart>) {
+  async update(id: string, data: Partial<Cart>): Promise<any> {
     const updated = await this.cartModel
       .findByIdAndUpdate(id, data, { new: true })
       .lean()
