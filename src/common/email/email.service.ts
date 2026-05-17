@@ -21,6 +21,33 @@ export interface EmailSendDebugResult {
   debug: EmailDebugInfo;
 }
 
+const extractEmailAddress = (value?: string): string | undefined => {
+  const trimmedValue = value?.trim();
+  if (!trimmedValue) return undefined;
+
+  const match = trimmedValue.match(/<([^<>]+)>/);
+  return (match?.[1] || trimmedValue).trim();
+};
+
+const sanitizeEmailDisplayName = (value: string): string =>
+  value
+    .replace(/["<>]/g, '')
+    .replace(/[\r\n]+/g, ' ')
+    .trim();
+
+const buildEmailFrom = (
+  configuredFrom: string | undefined,
+  displayName?: string,
+): string | undefined => {
+  const emailAddress = extractEmailAddress(configuredFrom);
+  if (!emailAddress) return undefined;
+
+  const normalizedDisplayName = sanitizeEmailDisplayName(displayName || '');
+  return normalizedDisplayName
+    ? `${normalizedDisplayName} <${emailAddress}>`
+    : emailAddress;
+};
+
 @Injectable()
 export class EmailService {
   private resend: Resend | null = null;
@@ -70,11 +97,13 @@ export class EmailService {
     to: string,
     subject: string,
     html: string,
+    fromDisplayName?: string,
   ): Promise<EmailSendDebugResult> {
     const resend = this.resend;
     const debug = this.getEmailDebugInfo();
+    const from = buildEmailFrom(this.emailFrom, fromDisplayName);
 
-    if (!resend || !this.emailFrom) {
+    if (!resend || !from) {
       const error =
         'El cliente de Resend no esta inicializado (revisa RESEND_API_KEY y EMAIL_FROM).';
       this.logger.error(`No se puede enviar email a ${to}. ${error}`);
@@ -87,7 +116,7 @@ export class EmailService {
 
     try {
       const { data, error } = await resend.emails.send({
-        from: this.emailFrom,
+        from,
         to: [to],
         subject,
         html,
@@ -135,7 +164,11 @@ export class EmailService {
     logoUrl: string;
   }> {
     const settings = await this.businessSettingsService.getSettings();
-    const brandName = settings.businessName.trim() || 'Tu tienda';
+    const brandName =
+      settings.businessName.trim() ||
+      this.configService.get<string>('EMAIL_BRAND_NAME')?.trim() ||
+      this.configService.get<string>('BUSINESS_NAME')?.trim() ||
+      'Tu tienda';
     const rawLogoUrl = settings.logoUrl.trim();
     const frontendUrl = (
       this.configService.get<string>('FRONTEND_URL') ?? ''
@@ -167,11 +200,12 @@ export class EmailService {
         <h1>Hola ${name}!</h1>
         <p>Gracias por registrarte en ${brand.brandName}.</p>
         <p>Tu codigo de verificacion es: <strong>${code}</strong></p>
-        <p>Ingresa este codigo en la tienda online para activar tu cuenta.</p>
+        <p>Ingresa este codigo en ${brand.brandName} para activar tu cuenta.</p>
         <br>
         <p>Si tu no creaste esta cuenta, puedes ignorar este mensaje.</p>
         <p>Saludos,<br>${brand.brandTeam}</p>
       `,
+      brand.brandName,
     );
   }
 
@@ -203,6 +237,7 @@ export class EmailService {
         <br>
         <p>Saludos,<br>${brand.brandTeam}</p>
       `,
+      brand.brandName,
     );
 
     if (!result.ok) {
@@ -241,6 +276,7 @@ export class EmailService {
         <br>
         <p>Saludos,<br>${brand.brandTeam}</p>
       `,
+      brand.brandName,
     );
 
     if (!result.ok) {
@@ -269,6 +305,7 @@ export class EmailService {
         <br>
         <p>Saludos,<br>${brand.brandTeam}</p>
       `,
+      brand.brandName,
     );
 
     if (!result.ok) {
